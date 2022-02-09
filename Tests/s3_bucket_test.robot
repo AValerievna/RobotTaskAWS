@@ -1,11 +1,13 @@
 *** Settings ***
 Test Template    Encryption test
-Library          Libraries/S3HandlerLibrary.py    drafts-s3-bucket
+Library          Libraries/S3HandlerLibrary.py    ${bucket_name}
 
+*** Variables ***
+${bucket_name}       drafts-s3-bucket
 
 *** Test Cases ***
 Encryption success    [Template]    Encryption test
-    ServerSideEncryptionConfigurationNotFoundError    drafts-s3-bucket
+    ServerSideEncryptionConfigurationNotFoundError    ${bucket_name}
 
 
 *** Keywords ***
