@@ -8,15 +8,34 @@ from config import AWS_SERVER_PUBLIC_KEY, AWS_SERVER_SECRET_KEY
 
 class S3BucketHandler(object):
 
-    def __init__(self, bucket_name, public_key=AWS_SERVER_PUBLIC_KEY, secret_key=AWS_SERVER_SECRET_KEY):
-        self._s3_client = boto3.client('s3', aws_access_key_id=public_key, aws_secret_access_key=secret_key)
-        self._s3_resource = boto3.resource('s3', aws_access_key_id=public_key, aws_secret_access_key=secret_key)
+    def __init__(self, bucket_name
+                 , public_key=AWS_SERVER_PUBLIC_KEY, secret_key=AWS_SERVER_SECRET_KEY
+    ):
+        self._s3_client = boto3.client('s3',
+                                       aws_access_key_id=public_key, aws_secret_access_key=secret_key
+                                       )
+        self._s3_resource = boto3.resource('s3',
+                                           aws_access_key_id=public_key, aws_secret_access_key=secret_key
+                                           )
         self._s3_bucket_name = bucket_name
-        if bucket_name not in self.list_buckets():
-            self.create_bucket(bucket_name)
+        try:
+            self._s3_resource.meta.client.head_bucket(Bucket=bucket_name)
+        except ClientError:
+            self._s3_client.create_bucket(Bucket=bucket_name,
+                                          CreateBucketConfiguration ={'LocationConstraint': 'eu-central-1'})
+            logging.info(f"Bucket {bucket_name} created successfully")
 
-    def create_bucket(self, bucket_name):
-        self._s3_client.create_bucket(Bucket=bucket_name)
+        response = self._s3_client.put_bucket_encryption(
+            Bucket=bucket_name,
+            ServerSideEncryptionConfiguration={
+                'Rules': [{'ApplyServerSideEncryptionByDefault': {'SSEAlgorithm': 'AES256'}}]})
+        logging.info(f"Bucket {bucket_name} was encrypted")
+
+
+    def create_bucket(self, bucket_name, config):
+        self._s3_client.create_bucket(Bucket=bucket_name,
+                                      CreateBucketConfiguration=config
+                                      )
         logging.info(f"Bucket {bucket_name} created successfully")
 
     def list_buckets(self):
