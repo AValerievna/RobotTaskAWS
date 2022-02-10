@@ -50,13 +50,13 @@ class S3BucketHandler(object):
         bucket = self._s3_resource.Bucket(bucket_name)
         return [bucket_object.key for bucket_object in bucket.objects.all()]
 
-    def file_exist(self):
+    def file_exist(self, bucket_name, path_in_bucket):
         try:
-            s3.head_object(Bucket='bucket_name', Key='file_path')
+            self._s3_client.head_object(Bucket=bucket_name, Key=path_in_bucket)
             return True
         except ClientError as e:
             logging.error("Bucket: %s, unexpected error: %s" % (bucket_name, e))
-            return e.response['Error']['Code']
+            return False
 
     def clear_bucket(self, bucket_name):
         bucket = self._s3_resource.Bucket(bucket_name)

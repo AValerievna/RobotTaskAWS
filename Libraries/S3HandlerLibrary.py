@@ -71,6 +71,15 @@ class S3HandlerLibrary(object):
         """
         self._handler.clear_bucket(bucket_name)
 
+    def is_file_exist(self, bucket_name, path_in_bucket):
+        """
+        get if the file exist in bucket
+
+        bucket_name: name of the new bucket
+        path_in_bucket: path of file in bucket
+        """
+        return  self._handler.file_exist(bucket_name, path_in_bucket)
+
     def remove_bucket_file(self, bucket_name, path_in_bucket):
         """
         delete bucket in object with path_in_bucket
